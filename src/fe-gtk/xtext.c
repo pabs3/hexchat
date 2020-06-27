@@ -3918,6 +3918,7 @@ gtk_xtext_kill_ent (xtext_buffer *buffer, textentry *ent)
 		/* Allow for "Marker line reset because exceeded scrollback limit. to appear. */
 		buffer->marker_pos = ent->next;
 		buffer->marker_state = MARKER_RESET_BY_KILL;
+		/* FIXME: save marker pos to disk */
 	}
 
 	if (ent->marks)
@@ -4056,6 +4057,7 @@ gtk_xtext_clear (xtext_buffer *buf, int lines)
 		buf->last_ent_start = NULL;
 		buf->last_ent_end = NULL;
 		buf->marker_pos = NULL;
+		/* FIXME: save marker pos to disk */
 		if (buf->text_first)
 			marker_reset = TRUE;
 		dontscroll (buf);
@@ -4600,6 +4602,7 @@ gtk_xtext_append_entry (xtext_buffer *buf, textentry * ent, time_t stamp)
 		buf->marker_state = MARKER_IS_SET;
 		dontscroll (buf); /* force scrolling off */
 		buf->marker_seen = FALSE;
+		/* FIXME: save marker pos to disk */
 	}
 
 	if (buf->xtext->max_lines > 2 && buf->xtext->max_lines < buf->num_lines)
@@ -4877,6 +4880,7 @@ gtk_xtext_set_marker_last (session *sess)
 
 	buf->marker_pos = buf->text_last;
 	buf->marker_state = MARKER_IS_SET;
+	/* FIXME: save marker pos to disk */
 }
 
 void
@@ -4888,6 +4892,7 @@ gtk_xtext_reset_marker_pos (GtkXText *xtext)
 		dontscroll (xtext->buffer); /* force scrolling off */
 		gtk_xtext_render_page (xtext);
 		xtext->buffer->marker_state = MARKER_RESET_MANUALLY;
+		/* FIXME: save marker pos to disk */
 	}
 }
 
