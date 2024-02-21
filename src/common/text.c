@@ -290,9 +290,11 @@ scrollback_load (session *sess)
 				text = strchr (buf + 3, ' ');
 				if (text && text[1])
 				{
+					text++; /* Use the text *after* the space */
+
 					if (prefs.hex_text_stripcolor_replay)
 					{
-						text = strip_color (text + 1, -1, STRIP_COLOR);
+						text = strip_color (text, -1, STRIP_COLOR);
 					}
 
 					fe_print_text (sess, text, stamp, TRUE);
