@@ -239,6 +239,17 @@ fe_set_tab_color (struct session *sess, tabcolor col)
 }
 
 static void
+mg_set_scroll_follow (session* cur_sess, session *sess)
+{
+	if (sess && sess->res && sess->res->buffer) {
+		gboolean active = gtk_window_is_active (GTK_WINDOW (sess->gui->window));
+		gboolean current = (sess == cur_sess && active);
+		gboolean scroll_follow = prefs.hex_text_scroll_follow || current;
+		gtk_xtext_set_scroll_follow (sess->res->buffer, scroll_follow);
+	}
+}
+
+static void
 mg_set_myself_away (session_gui *gui, gboolean away)
 {
 	gtk_label_set_attributes (GTK_LABEL (gtk_bin_get_child (GTK_BIN (gui->nick_label))),
@@ -287,7 +298,6 @@ mg_inputbox_focus (GtkWidget *widget, GdkEventFocus *event, session_gui *gui)
 		sess = list->data;
 		if (sess->gui == gui)
 		{
-			current_sess = sess;
 			if (!sess->server->server_session)
 				sess->server->server_session = sess;
 			break;
@@ -521,9 +531,13 @@ mg_show_generic_tab (GtkWidget *box)
 static void
 mg_focus (session *sess)
 {
+	mg_set_scroll_follow(sess, current_sess);
+
 	if (sess->gui->is_tab)
 		current_tab = sess;
 	current_sess = sess;
+
+	mg_set_scroll_follow(current_sess, sess);
 
 	/* dirty trick to avoid auto-selection */
 	SPELL_ENTRY_SET_EDITABLE (sess->gui->input_box, FALSE);
@@ -1713,6 +1727,7 @@ mg_add_chan (session *sess)
 	if (sess->res->buffer == NULL)
 	{
 		sess->res->buffer = gtk_xtext_buffer_new (GTK_XTEXT (sess->gui->xtext));
+		mg_set_scroll_follow(current_sess, sess);
 		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.hex_stamp_text);
 		sess->res->user_model = userlist_create_model (sess);
 	}
@@ -2345,6 +2360,7 @@ mg_create_textarea (session *sess, GtkWidget *box)
 
 	gui->xtext = gtk_xtext_new (colors, TRUE);
 	xtext = GTK_XTEXT (gui->xtext);
+	mg_set_scroll_follow(current_sess, sess);
 	gtk_xtext_set_max_indent (xtext, prefs.hex_text_max_indent);
 	gtk_xtext_set_thin_separator (xtext, prefs.hex_text_thin_sep);
 	gtk_xtext_set_urlcheck_function (xtext, mg_word_check);
@@ -3071,9 +3087,21 @@ mg_create_tabs (session_gui *gui)
 }
 
 static gboolean
+mg_tabwin_unfocus_cb (GtkWindow * win, GdkEventFocus *event, gpointer userdata)
+{
+	mg_set_scroll_follow(current_sess, current_sess);
+	return FALSE;
+}
+
+static gboolean
 mg_tabwin_focus_cb (GtkWindow * win, GdkEventFocus *event, gpointer userdata)
 {
+	mg_set_scroll_follow(current_tab, current_sess);
+
 	current_sess = current_tab;
+
+	mg_set_scroll_follow(current_sess, current_tab);
+
 	if (current_sess)
 	{
 		gtk_xtext_check_marker_visibility (GTK_XTEXT (current_sess->gui->xtext));
@@ -3084,9 +3112,21 @@ mg_tabwin_focus_cb (GtkWindow * win, GdkEventFocus *event, gpointer userdata)
 }
 
 static gboolean
+mg_topwin_unfocus_cb (GtkWindow * win, GdkEventFocus *event, session *sess)
+{
+	mg_set_scroll_follow(current_sess, current_sess);
+	return FALSE;
+}
+
+static gboolean
 mg_topwin_focus_cb (GtkWindow * win, GdkEventFocus *event, session *sess)
 {
+	mg_set_scroll_follow(sess, current_sess);
+
 	current_sess = sess;
+
+	mg_set_scroll_follow(current_sess, sess);
+
 	if (!sess->server->server_session)
 		sess->server->server_session = sess;
 	gtk_xtext_check_marker_visibility(GTK_XTEXT (current_sess->gui->xtext));
@@ -3142,6 +3182,8 @@ mg_create_topwindow (session *sess)
 
 	g_signal_connect (G_OBJECT (win), "focus_in_event",
 							G_CALLBACK (mg_topwin_focus_cb), sess);
+	g_signal_connect (G_OBJECT (win), "focus_out_event",
+							G_CALLBACK (mg_topwin_unfocus_cb), sess);
 	g_signal_connect (G_OBJECT (win), "destroy",
 							G_CALLBACK (mg_topdestroy_cb), sess);
 	g_signal_connect (G_OBJECT (win), "configure_event",
@@ -3163,6 +3205,7 @@ mg_create_topwindow (session *sess)
 	if (sess->res->buffer == NULL)
 	{
 		sess->res->buffer = gtk_xtext_buffer_new (GTK_XTEXT (sess->gui->xtext));
+		mg_set_scroll_follow(current_sess, sess);
 		gtk_xtext_buffer_show (GTK_XTEXT (sess->gui->xtext), sess->res->buffer, TRUE);
 		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.hex_stamp_text);
 		sess->res->user_model = userlist_create_model (sess);
@@ -3271,6 +3314,8 @@ mg_create_tabwindow (session *sess)
 						   G_CALLBACK (mg_tabwindow_kill_cb), 0);
 	g_signal_connect (G_OBJECT (win), "focus_in_event",
 							G_CALLBACK (mg_tabwin_focus_cb), NULL);
+	g_signal_connect (G_OBJECT (win), "focus_out_event",
+							G_CALLBACK (mg_tabwin_unfocus_cb), NULL);
 	g_signal_connect (G_OBJECT (win), "configure_event",
 							G_CALLBACK (mg_configure_cb), NULL);
 	g_signal_connect (G_OBJECT (win), "window_state_event",
@@ -3335,6 +3380,7 @@ mg_apply_setup (void)
 	while (list)
 	{
 		sess = list->data;
+		mg_set_scroll_follow(current_sess, sess);
 		gtk_xtext_set_time_stamp (sess->res->buffer, prefs.hex_stamp_text);
 		((xtext_buffer *)sess->res->buffer)->needs_recalc = TRUE;
 		if (!sess->gui->is_tab || !done_main)

@@ -3,7 +3,7 @@ project('hexchat', 'c',
   meson_version: '>= 0.47.0',
   default_options: [
     'c_std=gnu89',
-    'buildtype=debugoptimized',
+    'buildtype=debug',
     'warning_level=1',
   ]
 )

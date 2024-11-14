@@ -200,6 +200,7 @@ struct hexchatprefs
 	unsigned int hex_text_color_nicks;
 	unsigned int hex_text_indent;
 	unsigned int hex_text_replay;
+	unsigned int hex_text_scroll_follow;
 	unsigned int hex_text_search_case_match;
 	unsigned int hex_text_search_highlight_all;
 	unsigned int hex_text_search_follow;

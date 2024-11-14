@@ -105,6 +105,7 @@ typedef struct {
 	int window_height;
 
 	unsigned int time_stamp:1;
+	unsigned int scroll_follow:1;
 	unsigned int scrollbar_down:1;
 	unsigned int needs_recalc:1;
 	unsigned int marker_seen:1;
@@ -279,6 +280,7 @@ void gtk_xtext_set_error_function (GtkXText *xtext, void (*error_function) (int)
 void gtk_xtext_set_indent (GtkXText *xtext, gboolean indent);
 void gtk_xtext_set_max_indent (GtkXText *xtext, int max_auto_indent);
 void gtk_xtext_set_max_lines (GtkXText *xtext, int max_lines);
+void gtk_xtext_set_scroll_follow (xtext_buffer *buf, gboolean scroll_follow);
 void gtk_xtext_set_show_marker (GtkXText *xtext, gboolean show_marker);
 void gtk_xtext_set_show_separator (GtkXText *xtext, gboolean show_separator);
 void gtk_xtext_set_thin_separator (GtkXText *xtext, gboolean thin_separator);

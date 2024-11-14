@@ -566,6 +566,7 @@ const struct prefs vars[] =
 	{"text_max_indent", P_OFFINT (hex_text_max_indent), TYPE_INT},
 	{"text_max_lines", P_OFFINT (hex_text_max_lines), TYPE_INT},
 	{"text_replay", P_OFFINT (hex_text_replay), TYPE_BOOL},
+	{"text_scroll_follow", P_OFFINT (hex_text_scroll_follow), TYPE_BOOL},
 	{"text_search_case_match", P_OFFINT (hex_text_search_case_match), TYPE_BOOL},
 	{"text_search_highlight_all", P_OFFINT (hex_text_search_highlight_all), TYPE_BOOL},
 	{"text_search_follow", P_OFFINT (hex_text_search_follow), TYPE_BOOL},
@@ -792,6 +793,7 @@ load_default_config(void)
 	prefs.hex_text_autocopy_text = 1;
 	prefs.hex_text_indent = 1;
 	prefs.hex_text_replay = 1;
+	prefs.hex_text_scroll_follow = 1;
 	prefs.hex_text_search_follow = 1;
 	prefs.hex_text_show_marker = 1;
 	prefs.hex_text_show_sep = 1;

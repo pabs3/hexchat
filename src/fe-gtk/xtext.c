@@ -490,7 +490,7 @@ gtk_xtext_adjustment_set (xtext_buffer *buf, int fire_signal)
 
 		if (adj->value > adj->upper - adj->page_size)
 		{
-			buf->scrollbar_down = TRUE;
+			buf->scrollbar_down = buf->scroll_follow;
 			adj->value = adj->upper - adj->page_size;
 		}
 
@@ -519,7 +519,7 @@ gtk_xtext_adjustment_changed (GtkAdjustment * adj, GtkXText * xtext)
 	if (xtext->buffer->old_value != xtext->adj->value)
 	{
 		if (xtext->adj->value >= xtext->adj->upper - xtext->adj->page_size)
-			xtext->buffer->scrollbar_down = TRUE;
+			xtext->buffer->scrollbar_down = xtext->buffer->scroll_follow;
 		else
 			xtext->buffer->scrollbar_down = FALSE;
 
@@ -4070,7 +4070,7 @@ gtk_xtext_clear (xtext_buffer *buf, int lines)
 			gtk_xtext_search_fini (buf);
 		if (buf->xtext->auto_indent)
 			buf->indent = MARGIN;
-		buf->scrollbar_down = TRUE;
+		buf->scrollbar_down = buf->scroll_follow;
 		buf->last_ent_start = NULL;
 		buf->last_ent_end = NULL;
 		buf->marker_pos = NULL;
@@ -4853,6 +4853,13 @@ gtk_xtext_set_max_lines (GtkXText *xtext, int max_lines)
 }
 
 void
+gtk_xtext_set_scroll_follow (xtext_buffer *buf, gboolean scroll_follow)
+{
+	buf->scroll_follow = scroll_follow ? TRUE : FALSE;
+	buf->scrollbar_down = buf->scroll_follow;
+}
+
+void
 gtk_xtext_set_show_marker (GtkXText *xtext, gboolean show_marker)
 {
 	xtext->marker = show_marker;
@@ -5042,7 +5049,8 @@ gtk_xtext_buffer_new (GtkXText *xtext)
 	buf = g_new0 (xtext_buffer, 1);
 	buf->old_value = -1;
 	buf->xtext = xtext;
-	buf->scrollbar_down = TRUE;
+	buf->scroll_follow = TRUE;
+	buf->scrollbar_down = buf->scroll_follow;
 	buf->indent = xtext->space_width * 2;
 	dontscroll (buf);
 

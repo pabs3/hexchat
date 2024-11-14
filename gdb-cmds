@@ -1,0 +1,4 @@
+set pagination off
+set print frame-info short-location
+source gdb-cmds.py
+run
